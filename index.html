@@ -2116,7 +2116,7 @@
                     <span id="sfxLabel">SFX</span>
                 </button>
 
-                <button type="button" onclick="openShowreelModal()" class="btn btn-amber" style="padding: 0.45rem 0.85rem; font-size: 0.72rem;">
+                <button type="button" onclick="openShowreelModal('reels')" class="btn btn-amber" style="padding: 0.45rem 0.85rem; font-size: 0.72rem;">
                     ▶ Reel
                 </button>
 
@@ -2230,7 +2230,7 @@
 
             <!-- Direct Fast Action Buttons -->
             <div style="display:flex; flex-wrap:wrap; gap:0.75rem;">
-                <button type="button" onclick="closeFeatureMenu(true); openShowreelModal();" class="btn btn-amber" style="flex:1;">
+                <button type="button" onclick="closeFeatureMenu(true); openShowreelModal('showreel');" class="btn btn-amber" style="flex:1;">
                     ▶ Watch 2.39:1 Showreel
                 </button>
                 <a href="https://wa.me/919354650624?text=Hi%20Satish,%20I%20saw%20your%20cinematic%20portfolio%20and%20want%20to%20discuss%20a%20shoot."
@@ -2264,7 +2264,7 @@
                 </p>
 
                 <div class="hero-cta">
-                    <button type="button" onclick="openShowreelModal()" class="btn btn-amber">▶ Watch Showreel</button>
+                    <button type="button" onclick="openShowreelModal('showreel')" class="btn btn-amber">▶ Watch Showreel</button>
                     <a href="#lighting-lab" onclick="smoothJumpTo(event, 'lighting-lab')" class="btn btn-glass">💡 Lighting Lab</a>
                     <a href="#contact" onclick="smoothJumpTo(event, 'contact')" class="btn btn-cyan">✉ Book Direct Shoot</a>
                 </div>
@@ -3772,51 +3772,60 @@
             }
         }
 
-        const bestReelsPlaylist = [
+        const showreelOnlyPlaylist = [
             {
                 id: "yL2uEhEPj1A",
                 tag: "Short Film",
-                cat: "Cinematography • Narrative",
+                cat: "Showreel • Narrative Cinematography",
                 title: "Chasing Time | A Cinematic Visual Story"
             },
             {
                 id: "XEL0q03YmiI",
-                tag: "Short Video",
-                cat: "Cinematography • IHC Diwali",
+                tag: "Cinematography",
+                cat: "Showreel • Event Highlights (IHC)",
                 title: "IHC Diwali Celebration Cinematic Highlights"
-            },
+            }
+        ];
+
+        const reelsOnlyPlaylist = [
             {
                 id: "JHOIiyb1DiQ",
                 tag: "Color Grade",
-                cat: "Video Editing • Before vs After",
+                cat: "Reel • Before vs After Grading",
                 title: "Color Grading & Cinematic Portrait Edit"
             },
             {
                 id: "FPZaDtoYS_k",
                 tag: "Short Reel",
-                cat: "Video Editing • Beat Sync",
+                cat: "Reel • Beat Sync Edit",
                 title: "YouTube Short Reel | Cinematic Edit"
             },
             {
                 id: "lSjPsSsefxg",
                 tag: "Commercial",
-                cat: "Video Editing • Showroom Reel",
+                cat: "Reel • Showroom Edit",
                 title: "High-Energy Cinematic Reel Edit | Satish CineVision"
             },
             {
                 id: "qOQLMm07PBI",
                 tag: "Talking Head",
-                cat: "Video Editing • Commercial",
+                cat: "Reel • Brand & Skincare",
                 title: "Talking Head Reel | Bridal Skincare & Makeup Tips"
             }
         ];
 
+        let activePlaylistMode = 'showreel';
         let currentShowreelIdx = 0;
+
+        function getActivePlaylist() {
+            return activePlaylistMode === 'reels' ? reelsOnlyPlaylist : showreelOnlyPlaylist;
+        }
 
         function renderShowreelPlaylist() {
             const grid = document.getElementById('showreelPlaylistGrid');
             if (!grid) return;
-            grid.innerHTML = bestReelsPlaylist.map((item, idx) => `
+            const list = getActivePlaylist();
+            grid.innerHTML = list.map((item, idx) => `
                 <div class="showreel-item ${idx === currentShowreelIdx ? 'active' : ''}" onclick="selectShowreelItem(${idx})">
                     <div class="showreel-item-thumb">
                         <img src="https://img.youtube.com/vi/${item.id}/hqdefault.jpg" alt="${item.title}" loading="lazy">
@@ -3830,29 +3839,33 @@
         }
 
         function selectShowreelItem(idx) {
-            if (idx < 0 || idx >= bestReelsPlaylist.length) return;
+            const list = getActivePlaylist();
+            if (idx < 0 || idx >= list.length) return;
             currentShowreelIdx = idx;
-            const item = bestReelsPlaylist[idx];
+            const item = list[idx];
             const iframe = document.getElementById('showreelIframe');
             const titleEl = document.getElementById('showreelActiveTitle');
             const catEl = document.getElementById('showreelActiveCat');
             if (iframe) iframe.src = `https://www.youtube.com/embed/${item.id}?autoplay=1`;
             if (titleEl) titleEl.textContent = item.title;
-            if (catEl) catEl.textContent = `${item.cat} • REEL ${idx + 1} OF ${bestReelsPlaylist.length}`;
+            const label = activePlaylistMode === 'reels' ? 'REEL' : 'SHOWREEL';
+            if (catEl) catEl.textContent = `${item.cat} • ${label} ${idx + 1} OF ${list.length}`;
             renderShowreelPlaylist();
             if (typeof cineSfx !== 'undefined') cineSfx.playTick();
         }
 
         function stepShowreel(dir) {
-            const next = (currentShowreelIdx + dir + bestReelsPlaylist.length) % bestReelsPlaylist.length;
+            const list = getActivePlaylist();
+            const next = (currentShowreelIdx + dir + list.length) % list.length;
             selectShowreelItem(next);
         }
 
-        function openShowreelModal(startIdx = 0) {
+        function openShowreelModal(mode = 'showreel') {
             lockBodyScroll();
             activeModalType = 'showreel';
+            activePlaylistMode = (mode === 'reels') ? 'reels' : 'showreel';
             const modal = document.getElementById('showreelModal');
-            selectShowreelItem(typeof startIdx === 'number' ? startIdx : 0);
+            selectShowreelItem(0);
             modal.classList.add('open');
             history.pushState({ satishModal: 'showreel' }, '');
         }
