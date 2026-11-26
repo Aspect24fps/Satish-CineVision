@@ -1548,6 +1548,91 @@
             z-index: 20;
         }
 
+        .showreel-playlist-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin: 0.9rem 0 0.65rem;
+            padding-bottom: 0.55rem;
+            border-bottom: 1px solid var(--border-subtle);
+            flex-wrap: wrap;
+        }
+
+        .showreel-playlist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+            gap: 0.6rem;
+            max-height: 220px;
+            overflow-y: auto;
+            padding-right: 2px;
+        }
+
+        .showreel-item {
+            background: #0a0d14;
+            border: 1px solid var(--border-subtle);
+            border-radius: 0.55rem;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .showreel-item:hover {
+            border-color: var(--amber-cine);
+            transform: translateY(-2px);
+        }
+
+        .showreel-item.active {
+            border-color: var(--amber-cine);
+            background: rgba(245, 158, 11, 0.12);
+            box-shadow: 0 0 14px rgba(245, 158, 11, 0.2);
+        }
+
+        .showreel-item-thumb {
+            position: relative;
+            aspect-ratio: 16 / 9;
+            background: #000;
+            overflow: hidden;
+        }
+
+        .showreel-item-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .showreel-item-badge {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            background: rgba(0, 0, 0, 0.8);
+            color: var(--amber-cine);
+            font-family: var(--font-mono);
+            font-size: 0.56rem;
+            font-weight: 700;
+            padding: 1px 5px;
+            border-radius: 3px;
+            text-transform: uppercase;
+        }
+
+        .showreel-item-info {
+            padding: 0.45rem 0.55rem;
+        }
+
+        .showreel-item-title {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.25;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
         .modal-close-btn:hover {
             background: var(--red-rec);
         }
@@ -2900,9 +2985,9 @@
         </div>
     </footer>
 
-    <!-- MODAL: SHOWREEL -->
+    <!-- MODAL: SHOWREEL (MULTI-REEL PLAYLIST) -->
     <div id="showreelModal" class="modal-overlay" onclick="if(event.target===this) closeShowreelModal()">
-        <div class="modal-box">
+        <div class="modal-box" style="max-width: 860px;">
             <button type="button" onclick="closeShowreelModal()" class="modal-close-btn">✕</button>
             <div style="position:relative; aspect-ratio:16/9; background:#000; border-radius:0.5rem; overflow:hidden;">
                 <iframe id="showreelIframe" style="width:100%; height:100%; border:none;"
@@ -2910,6 +2995,23 @@
                     data-src="https://www.youtube.com/embed/yL2uEhEPj1A?autoplay=1"
                     allow="autoplay; encrypted-media" allowfullscreen></iframe>
             </div>
+
+            <div class="showreel-playlist-header">
+                <div>
+                    <span id="showreelActiveCat" style="font-family:var(--font-mono); font-size:0.66rem; color:var(--amber-cine); text-transform:uppercase; font-weight:700;">
+                        SHOWREEL PLAYLIST • 6 BEST REELS
+                    </span>
+                    <h3 id="showreelActiveTitle" style="font-size:1.05rem; color:#fff; font-weight:800; margin-top:2px;">
+                        Chasing Time | A Cinematic Visual Story
+                    </h3>
+                </div>
+                <div style="display:flex; gap:0.4rem;">
+                    <button type="button" onclick="stepShowreel(-1)" class="filter-btn" style="padding:0.3rem 0.65rem; font-size:0.7rem;">&#10094; Prev</button>
+                    <button type="button" onclick="stepShowreel(1)" class="filter-btn" style="padding:0.3rem 0.65rem; font-size:0.7rem;">Next &#10095;</button>
+                </div>
+            </div>
+
+            <div class="showreel-playlist-grid" id="showreelPlaylistGrid"></div>
         </div>
     </div>
 
@@ -3670,14 +3772,87 @@
             }
         }
 
-        function openShowreelModal() {
+        const bestReelsPlaylist = [
+            {
+                id: "yL2uEhEPj1A",
+                tag: "Short Film",
+                cat: "Cinematography • Narrative",
+                title: "Chasing Time | A Cinematic Visual Story"
+            },
+            {
+                id: "XEL0q03YmiI",
+                tag: "Short Video",
+                cat: "Cinematography • IHC Diwali",
+                title: "IHC Diwali Celebration Cinematic Highlights"
+            },
+            {
+                id: "JHOIiyb1DiQ",
+                tag: "Color Grade",
+                cat: "Video Editing • Before vs After",
+                title: "Color Grading & Cinematic Portrait Edit"
+            },
+            {
+                id: "FPZaDtoYS_k",
+                tag: "Short Reel",
+                cat: "Video Editing • Beat Sync",
+                title: "YouTube Short Reel | Cinematic Edit"
+            },
+            {
+                id: "lSjPsSsefxg",
+                tag: "Commercial",
+                cat: "Video Editing • Showroom Reel",
+                title: "High-Energy Cinematic Reel Edit | Satish CineVision"
+            },
+            {
+                id: "qOQLMm07PBI",
+                tag: "Talking Head",
+                cat: "Video Editing • Commercial",
+                title: "Talking Head Reel | Bridal Skincare & Makeup Tips"
+            }
+        ];
+
+        let currentShowreelIdx = 0;
+
+        function renderShowreelPlaylist() {
+            const grid = document.getElementById('showreelPlaylistGrid');
+            if (!grid) return;
+            grid.innerHTML = bestReelsPlaylist.map((item, idx) => `
+                <div class="showreel-item ${idx === currentShowreelIdx ? 'active' : ''}" onclick="selectShowreelItem(${idx})">
+                    <div class="showreel-item-thumb">
+                        <img src="https://img.youtube.com/vi/${item.id}/hqdefault.jpg" alt="${item.title}" loading="lazy">
+                        <span class="showreel-item-badge">${idx === currentShowreelIdx ? '▶ Playing' : item.tag}</span>
+                    </div>
+                    <div class="showreel-item-info">
+                        <div class="showreel-item-title">${item.title}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function selectShowreelItem(idx) {
+            if (idx < 0 || idx >= bestReelsPlaylist.length) return;
+            currentShowreelIdx = idx;
+            const item = bestReelsPlaylist[idx];
+            const iframe = document.getElementById('showreelIframe');
+            const titleEl = document.getElementById('showreelActiveTitle');
+            const catEl = document.getElementById('showreelActiveCat');
+            if (iframe) iframe.src = `https://www.youtube.com/embed/${item.id}?autoplay=1`;
+            if (titleEl) titleEl.textContent = item.title;
+            if (catEl) catEl.textContent = `${item.cat} • REEL ${idx + 1} OF ${bestReelsPlaylist.length}`;
+            renderShowreelPlaylist();
+            if (typeof cineSfx !== 'undefined') cineSfx.playTick();
+        }
+
+        function stepShowreel(dir) {
+            const next = (currentShowreelIdx + dir + bestReelsPlaylist.length) % bestReelsPlaylist.length;
+            selectShowreelItem(next);
+        }
+
+        function openShowreelModal(startIdx = 0) {
             lockBodyScroll();
             activeModalType = 'showreel';
             const modal = document.getElementById('showreelModal');
-            const iframe = document.getElementById('showreelIframe');
-            if (iframe && iframe.dataset.src) {
-                iframe.src = iframe.dataset.src;
-            }
+            selectShowreelItem(typeof startIdx === 'number' ? startIdx : 0);
             modal.classList.add('open');
             history.pushState({ satishModal: 'showreel' }, '');
         }
