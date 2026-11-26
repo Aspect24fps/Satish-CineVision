@@ -59,6 +59,29 @@
             overflow-x: hidden;
             width: 100%;
             -webkit-font-smoothing: antialiased;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: -20%;
+            background:
+                radial-gradient(circle at 22% 28%, rgba(245, 158, 11, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 78% 68%, rgba(6, 182, 212, 0.05) 0%, transparent 42%);
+            pointer-events: none;
+            z-index: 0;
+            animation: cineAmbientDrift 18s ease-in-out infinite alternate;
+        }
+
+        @keyframes cineAmbientDrift {
+            0% { transform: translate3d(0, 0, 0) scale(1); }
+            100% { transform: translate3d(-2%, 2%, 0) scale(1.05); }
+        }
+
+        section, footer {
+            position: relative;
+            z-index: 1;
         }
 
         a {
@@ -1755,6 +1778,177 @@
             font-weight: 600;
         }
 
+        /* ===================================================
+           CINEMATIC VISUAL ANIMATIONS (ORIGINAL DARK THEME)
+        =================================================== */
+        #cineScrollProgress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            width: 0%;
+            background: linear-gradient(90deg, var(--amber-cine), var(--amber-warm), var(--cyan-cine));
+            z-index: 1001;
+            transition: width 0.08s linear;
+            pointer-events: none;
+        }
+
+        @keyframes cineFadeUp {
+            from { opacity: 0; transform: translateY(22px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes btnSheen {
+            0% { transform: translateX(-140%) skewX(-20deg); }
+            100% { transform: translateX(240%) skewX(-20deg); }
+        }
+
+        @keyframes anamorphicFlare {
+            0%, 60% { left: -60%; opacity: 0; }
+            72% { opacity: 0.85; }
+            92% { left: 120%; opacity: 0; }
+            100% { left: 120%; opacity: 0; }
+        }
+
+        @keyframes kenBurnsSlow {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.07); }
+        }
+
+        @keyframes floatBokeh {
+            0% { transform: translate3d(0, 0, 0) scale(1); }
+            50% { transform: translate3d(25px, -35px, 0) scale(1.15); }
+            100% { transform: translate3d(-20px, -65px, 0) scale(0.95); }
+        }
+
+        @keyframes cardPopIn {
+            from { opacity: 0; transform: translateY(16px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .hero-box .status-pill { animation: cineFadeUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
+        .hero-box .hero-title { animation: cineFadeUp 0.65s 0.08s cubic-bezier(0.22, 1, 0.36, 1) both; }
+        .hero-box .hero-bio { animation: cineFadeUp 0.7s 0.16s cubic-bezier(0.22, 1, 0.36, 1) both; }
+        .hero-box .hero-cta { animation: cineFadeUp 0.75s 0.24s cubic-bezier(0.22, 1, 0.36, 1) both; }
+        .hero-box .hero-highlights { animation: cineFadeUp 0.8s 0.32s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+        .hero-title .gradient-text {
+            background-size: 200% 200%;
+            animation: gradientShift 6s ease infinite;
+        }
+
+        .hero-box::after {
+            content: "";
+            position: absolute;
+            top: 18%;
+            left: -60%;
+            width: 55%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.6), rgba(245, 158, 11, 0.85), transparent);
+            box-shadow: 0 0 18px rgba(6, 182, 212, 0.45);
+            pointer-events: none;
+            opacity: 0;
+            animation: anamorphicFlare 7s ease-in-out infinite;
+        }
+
+        .btn-amber {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-amber::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 45%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+            transform: translateX(-140%) skewX(-20deg);
+            pointer-events: none;
+        }
+
+        .btn-amber:hover::after {
+            animation: btnSheen 0.75s ease forwards;
+        }
+
+        .cine-card .hud-bracket {
+            transition: width 0.25s ease, height 0.25s ease, border-color 0.25s ease;
+        }
+
+        .cine-card:hover .hud-bracket {
+            width: 18px;
+            height: 18px;
+            border-color: var(--amber-warm);
+        }
+
+        .live-card {
+            animation: cardPopIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        .live-card-media img {
+            animation: kenBurnsSlow 14s ease-in-out infinite alternate;
+        }
+
+        .live-card:hover .live-card-media img {
+            animation-play-state: paused;
+            transform: scale(1.09);
+        }
+
+        .cine-bokeh-layer {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .cine-bokeh-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(2px);
+            opacity: 0.22;
+            animation: floatBokeh 18s ease-in-out infinite alternate;
+        }
+
+        .cine-reveal {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1), transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: opacity, transform;
+        }
+
+        .cine-reveal.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            body::before,
+            .hero-box::after,
+            .hero-box .status-pill,
+            .hero-box .hero-title,
+            .hero-box .hero-bio,
+            .hero-box .hero-cta,
+            .hero-box .hero-highlights,
+            .hero-title .gradient-text,
+            .live-card-media img,
+            .cine-bokeh-orb {
+                animation: none !important;
+            }
+            .cine-reveal {
+                opacity: 1 !important;
+                transform: none !important;
+                transition: none !important;
+            }
+        }
+
         /* Responsive Breakpoints */
         @media (min-width: 640px) {
             .hero-title { font-size: 3.25rem; }
@@ -1784,6 +1978,12 @@
 </head>
 
 <body>
+    <div id="cineScrollProgress" aria-hidden="true"></div>
+    <div class="cine-bokeh-layer" aria-hidden="true">
+        <span class="cine-bokeh-orb" style="width:140px;height:140px;left:8%;top:20%;background:radial-gradient(circle,rgba(245,158,11,0.35),transparent 70%);animation-duration:15s;"></span>
+        <span class="cine-bokeh-orb" style="width:190px;height:190px;right:10%;top:35%;background:radial-gradient(circle,rgba(6,182,212,0.28),transparent 70%);animation-duration:21s;animation-delay:-5s;"></span>
+        <span class="cine-bokeh-orb" style="width:110px;height:110px;left:28%;bottom:15%;background:radial-gradient(circle,rgba(245,158,11,0.26),transparent 70%);animation-duration:17s;animation-delay:-8s;"></span>
+    </div>
 
     <!-- 0. TOP CINEMA STATUS HUD -->
     <div class="top-hud">
@@ -1795,6 +1995,8 @@
                 <span>24.000 FPS</span>
                 <span style="margin: 0 6px;">|</span>
                 <span style="color: var(--amber-cine)">180° SHUTTER</span>
+                <span style="margin: 0 6px;">|</span>
+                <span id="liveTimecode" style="color: var(--cyan-cine);">01:00:00:00</span>
             </div>
             <div>
                 <span style="color: #10b981;">● Delhi NCR &bull; Available</span>
@@ -3852,6 +4054,58 @@
             cineSfx.playChime();
             window.open("https://wa.me/" + MY_WHATSAPP + "?text=" + text, "_blank");
         }
+
+        // ==========================================
+        // 7. CINEMATIC SCROLL REVEAL, TIMECODE & PROGRESS BAR
+        // ==========================================
+        (function initScrollReveal() {
+            const targets = document.querySelectorAll(
+                '.section-header, .pillar-card, .live-gallery-wrap, .about-grid, .controls-card, .viewport-container, .slider-wrapper, .gear-card, .social-link-card, .contact-box'
+            );
+            targets.forEach((el, i) => {
+                el.classList.add('cine-reveal');
+                el.style.transitionDelay = ((i % 4) * 55) + 'ms';
+            });
+
+            if (!('IntersectionObserver' in window)) {
+                targets.forEach(el => el.classList.add('is-visible'));
+                return;
+            }
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+
+            targets.forEach(el => observer.observe(el));
+        })();
+
+        (function initTimecode() {
+            const el = document.getElementById('liveTimecode');
+            if (!el) return;
+            let frames = 0;
+            setInterval(() => {
+                frames = (frames + 1) % (24 * 3600);
+                const ff = String(frames % 24).padStart(2, '0');
+                const totalSec = Math.floor(frames / 24);
+                const ss = String(totalSec % 60).padStart(2, '0');
+                const mm = String(Math.floor(totalSec / 60) % 60).padStart(2, '0');
+                const hh = String(1 + Math.floor(totalSec / 3600)).padStart(2, '0');
+                el.textContent = `${hh}:${mm}:${ss}:${ff}`;
+            }, 1000 / 24);
+        })();
+
+        window.addEventListener('scroll', () => {
+            const bar = document.getElementById('cineScrollProgress');
+            if (!bar) return;
+            const docH = document.documentElement.scrollHeight - window.innerHeight;
+            const pct = docH > 0 ? (window.scrollY / docH) * 100 : 0;
+            bar.style.width = Math.min(100, Math.max(0, pct)) + '%';
+        }, { passive: true });
     </script>
 </body>
 
